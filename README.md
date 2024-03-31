@@ -1,2 +1,3 @@
 # pipelines
-Service to manage downloading of statistics
+
+Service to manage data collection and analysis
