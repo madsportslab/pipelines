@@ -26,12 +26,20 @@ const (
 
 
 const (
+	SCHEDULE_JSON               = "schedule.json"
 	EXT_JSON										= ".json"
+	EXT_PBP                     = ".pbp"
 )
 
 
 const (
 	GAME_FINAL									= "Final"
+)
+
+
+const (
+	STR_TAB											= "\t"
+	STR_EMPTY										= ""
 )
 
 

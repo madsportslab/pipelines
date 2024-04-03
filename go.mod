@@ -5,7 +5,7 @@ go 1.21.5
 require (
 	github.com/gorilla/mux v1.8.1
 	github.com/madsportslab/nbalake v0.0.0-20240331150912-a09c6981e028
-	github.com/stephenhu/stats v0.5.2
+	github.com/stephenhu/stats v0.5.5
 )
 
 require (

@@ -10,12 +10,15 @@ import (
 	"github.com/stephenhu/stats"
 )
 
+var rawBucket, analyticsBucket string
+
 
 func initRouter() *mux.Router {
 
 	router := mux.NewRouter()
 
 	router.HandleFunc("/api/v1/games", gameHandler)
+	router.HandleFunc("/api/v1/schedule", scheduleHandler)
 	router.HandleFunc("/api/v1/version", versionHandler)
 
 	return router
@@ -30,6 +33,14 @@ func initLake() {
 	currentSeason = stats.GetCurrentSeason()
 
 	nbalake.InitBuckets([]string{"2023.nba.raw", "2023.nba.analytics"})
+
+	rawBucket = nbalake.BucketName(currentSeason,
+		nbalake.BUCKET_RAW)
+
+	analyticsBucket = nbalake.BucketName(currentSeason,
+		nbalake.BUCKET_RAW)
+
+	loadSchedule()
 
 } // initLake
 

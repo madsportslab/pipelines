@@ -12,31 +12,40 @@ import (
 )
 
 
-func pullGames(ids string) {
+func storeJson(fn string, data interface{}) {
 
-	games := parseList(ids, DELIMITER_COMMA)
+	j, err := json.Marshal(data)
 
-	raw := nbalake.BucketName(currentSeason,
-		nbalake.BUCKET_RAW)
+	if err != nil {
+		log.Println(err)
+	} else {
+		nbalake.Put(rawBucket, fn, j)
+	}
+
+} // storeJson
+
+
+func pullGames(games []string) {
 
 	for _, g := range games {
 
 		fn := fmt.Sprintf("%s%s", g, EXT_JSON)
+    fp := fmt.Sprintf("%s%s%s", g, EXT_PBP, EXT_JSON)
 
-		if !nbalake.Exists(raw, fn) {
+		score := stats.NbaGetBoxscore(g)
 
-			score := stats.NbaGetBoxscore(g)
+		if score.Game.Status == GAME_FINAL {
 
-			if score.Game.Status == GAME_FINAL {
-
-				j, err := json.Marshal(score)
-
-				if err != nil {
-					log.Println(err)
-				} else {
-					nbalake.Put(raw, fn, j)
-				}
-
+			if !nbalake.Exists(rawBucket, fn) {
+				storeJson(fn, score)
+			}
+	
+			if !nbalake.Exists(rawBucket, fp) {
+				
+				plays := stats.NbaGetPlays(g)
+	
+				storeJson(fp, plays)
+		
 			}
 	
 		}
@@ -56,8 +65,18 @@ func gameHandler(w http.ResponseWriter, r *http.Request) {
 		// r.FormValue(FORM_PARAM_SEASON)
 		// r.FormValue(FORM_PARAM_LEAGUE)
 		
-		pullGames(ids)
+		games := parseList(ids, DELIMITER_COMMA)
 
+		pullGames(games)
+
+
+	case http.MethodPut:
+
+		games := getGamesToDownload()
+
+		log.Println(games)
+
+		pullGames(games)
 
 	case http.MethodGet:
 
