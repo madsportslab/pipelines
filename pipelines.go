@@ -4,7 +4,7 @@ package main
 const (
 	APP_NAME										= "pipelines"
 	APP_VERSION									= "1.0"
-	APP_SYNC_PERIOD             = 6
+	APP_SYNC_PERIOD             = 12
 )
 
 const (
