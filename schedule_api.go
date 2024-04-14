@@ -41,27 +41,6 @@ func getSchedule() {
 } // getSchedule
 
 
-func getGamesToDownload() []string {
-
-	games := []string{}
-
-	for _, dates := range schedule.LeagueSchedule.GameDates {
-
-		if !stats.IsFutureGame(dates.GameDate) {
-
-			for _, game := range dates.Games {
-				games = append(games, game.ID)
-			}
-
-		}
-
-	}
-
-	return games
-
-} // getGamesToDownload
-
-
 func scheduleHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {

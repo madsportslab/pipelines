@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/madsportslab/nbalake"
@@ -12,8 +11,6 @@ import (
 )
 
 var rawBucket, analyticsBucket string
-
-var syncTicker *time.Ticker
 
 
 func initRouter() *mux.Router {
@@ -51,35 +48,6 @@ func initLake() {
 } // initLake
 
 
-func initSyncJob() {
-
-	syncTicker := time.NewTicker(
-		APP_SYNC_PERIOD * time.Hour)
-	
-	done := make(chan bool)
-
-	go func() {
-		
-		for {
-
-			select {
-			case <-done:
-				return
-			case <-syncTicker.C:
-
-				resumeGamesDownload()
-
-				generateData()
-
-			}
-
-		}
-
-	}()
-
-} // initSyncJob
-
-
 func main() {
 
 	fmt.Printf("Starting %s v%s...\n", APP_NAME, APP_VERSION)
@@ -87,6 +55,10 @@ func main() {
 	initLake()
 
 	initSyncJob()
+
+	initJobListener()
+
+	resumeGamesDownload()
 
 	log.Fatal(http.ListenAndServe(":8686", initRouter()))
 

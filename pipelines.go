@@ -44,5 +44,9 @@ const (
 	NBA_DATE_FORMAT							= "20060102"
 )
 
+const (
+	JOB_BOXSCORE               	= "boxscore"
+	JOB_PLAYBYPLAY							= "playbyplay"
+)
 
 var currentSeason	string

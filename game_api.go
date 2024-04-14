@@ -25,37 +25,86 @@ func storeJson(bucket string, fn string, data interface{}) {
 } // storeJson
 
 
-func pullGames(bucket string, games []string) {
+func storeGame(bucket string, id string) {
 
-	// check valid year
+	fn := fmt.Sprintf("%s%s", id, EXT_JSON)
+
+	score := stats.NbaGetBoxscore(id)
+
+	if score.Game.Status == GAME_FINAL {
+
+		if !nbalake.Exists(bucket, fn) {
+
+			log.Printf("Storing object %s into %s\n", fn, bucket)
+
+			storeJson(bucket, fn, score)
+
+			jobMu.Lock()
+			jobState[jobName(bucket, id, JOB_BOXSCORE)] = true
+			jobMu.Unlock()
+
+		}
+
+		storePlays(bucket, id)
+
+	}
+
+} // storeBoxscore
+
+
+func storePlays(bucket string, id string) {
+
+	fn := fmt.Sprintf("%s%s%s", id, EXT_PBP, EXT_JSON)
+
+	if !nbalake.Exists(bucket, fn) {
+			
+		plays := stats.NbaGetPlays(id)
+
+		log.Printf("Storing object %s into %s\n", fn, bucket)
+
+		storeJson(bucket, fn, plays)
+
+		jobMu.Lock()
+		jobState[jobName(bucket, id, JOB_PLAYBYPLAY)] = true
+		jobMu.Unlock()
+
+	}
+
+} // storePlays
+
+
+
+func getGamesToDownload() []string {
+
+	games := []string{}
+
+	for _, dates := range schedule.LeagueSchedule.GameDates {
+
+		if !stats.IsFutureGame(dates.GameDate) {
+
+			for _, game := range dates.Games {
+				games = append(games, game.ID)
+			}
+
+		}
+
+	}
+
+	return games
+
+} // getGamesToDownload
+
+
+func pullGames(bucket string, games []string) {
 
 	for _, g := range games {
 
-		fn := fmt.Sprintf("%s%s", g, EXT_JSON)
-    fp := fmt.Sprintf("%s%s%s", g, EXT_PBP, EXT_JSON)
+		jobState[jobName(bucket, g, JOB_BOXSCORE)] = false
+		jobState[jobName(bucket, g, JOB_PLAYBYPLAY)] = false
 
-		score := stats.NbaGetBoxscore(g)
-
-		if score.Game.Status == GAME_FINAL {
-
-			if !nbalake.Exists(bucket, fn) {
-
-				log.Printf("Storing object %s into %s\n", fn, bucket)
-
-				storeJson(bucket, fn, score)
-
-			}
-	
-			if !nbalake.Exists(bucket, fp) {
-				
-				plays := stats.NbaGetPlays(g)
-	
-				log.Printf("Storing object %s into %s\n", fp, bucket)
-
-				storeJson(bucket, fp, plays)
-		
-			}
-	
+		downloads <- Download{
+			GameID: g,
+			Bucket: bucket,
 		}
 
 	}
@@ -90,6 +139,13 @@ func gameHandler(w http.ResponseWriter, r *http.Request) {
 
 	case http.MethodGet:
 
+		j, err := json.Marshal(jobState)
+
+		if err != nil {
+			log.Println(err)
+		} else {
+			w.Write(j)
+		}
 
 	default:
 	}
