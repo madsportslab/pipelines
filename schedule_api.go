@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 
-	//"github.com/gorilla/mux"
 	"github.com/madsportslab/nbalake"
 	"github.com/stephenhu/stats"
 )
@@ -30,13 +29,9 @@ func loadSchedule() {
 
 func getSchedule() {
 
-	if !nbalake.Exists(rawBucket, SCHEDULE_JSON) {
-			
-		j := stats.NbaGetScheduleJson()
+	j := stats.NbaGetScheduleJson()
 
-		nbalake.Put(rawBucket, SCHEDULE_JSON, j)
-
-	}
+	nbalake.Put(rawBucket, SCHEDULE_JSON, j)
 
 } // getSchedule
 

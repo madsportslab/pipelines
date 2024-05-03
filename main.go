@@ -35,15 +35,19 @@ func initLake() {
 
 	currentSeason = stats.GetCurrentSeason()
 
-	nbalake.InitBuckets([]string{"2023.nba.raw", "2023.nba.analytics"})
-
 	rawBucket = nbalake.BucketName(currentSeason,
 		nbalake.BUCKET_RAW)
 
 	analyticsBucket = nbalake.BucketName(currentSeason,
 		nbalake.BUCKET_ANALYTICS)
 
+	nbalake.InitBuckets([]string{
+		rawBucket,
+		analyticsBucket})
+
 	loadSchedule()
+
+	initGameMap()
 
 } // initLake
 
@@ -58,7 +62,7 @@ func main() {
 
 	initJobListener()
 
-	resumeGamesDownload()
+	go resumeGamesDownload()
 
 	log.Fatal(http.ListenAndServe(":8686", initRouter()))
 

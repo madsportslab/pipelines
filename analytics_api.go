@@ -17,16 +17,8 @@ import (
 	"github.com/stephenhu/stats"
 )
 
-
-const (
-	PLAYERS_PREFIX      		= "players"
-	GAMES_PREFIX      			= "games"
-	LEADERS_PREFIX      		= "leaders"
-	STANDINGS_PREFIX    		= "standings"
-)
-
 var (
-  gt 							map[string]int
+	gt              map[string] int
 	scores        	[]stats.NbaBoxscore
 	playerMap     	*stats.PlayerMap
 	leaders       	map[int]*stats.Leaders
@@ -311,7 +303,7 @@ func boxscoreToParquet(s stats.NbaBoxscore, home bool,
 		rb.Field(40).(*array.Int32Builder).Append(int32(p.Statistics.PointsFast))
 		rb.Field(41).(*array.Int32Builder).Append(int32(p.Statistics.PointsPaint))
 		rb.Field(42).(*array.Int32Builder).Append(int32(p.Statistics.PointsSecond))
-		rb.Field(43).(*array.Int32Builder).Append(int32(gt[s.Game.ID]))
+		rb.Field(43).(*array.Int32Builder).Append(int32(gameType(s.Game)))
 
 	}
 
@@ -623,8 +615,6 @@ func generatePlayers() {
 
 	defer builder.Release()
 
-	log.Println(len(scores))
-
 	for _, score := range scores {
 
 		boxscoreToParquet(score, true, builder)
@@ -637,7 +627,7 @@ func generatePlayers() {
 } // generatePlayers
 
 
-func generateLeaders() {
+func generateLeaders(t int) {
 
 	leadersSchema := createLeadersSchema()
 
@@ -646,9 +636,11 @@ func generateLeaders() {
 
 	defer builder.Release()
 
+	leaders = make(map[int]*stats.Leaders)
+
 	for _, score := range scores {
 
-		if gt[score.Game.ID] == stats.REGULAR {
+		if gt[score.Game.ID] == t {
 			
 			boxscoreAggregator(score.Game.Home.Players)
 			boxscoreAggregator(score.Game.Away.Players)
@@ -659,7 +651,16 @@ func generateLeaders() {
 
 	leaderParquet(builder)
 
-	flushParquet(leadersSchema, builder, LEADERS_PREFIX)
+	prefix := REGULAR_PREFIX
+
+	if t == GAME_TYPE_PRESEASON {
+		prefix = PRESEASON_PREFIX
+	} else if t == GAME_TYPE_PLAYOFF {
+		prefix = PLAYOFF_PREFIX
+	}
+
+	flushParquet(leadersSchema, builder, fmt.Sprintf("%s.%s",
+	  prefix, LEADERS_PREFIX))
 
 } // generateLeaders
 
@@ -687,27 +688,6 @@ func generateStandings() {
 	saveStandings()
 	
 } // generateStandings
-
-
-func initScheduleGameTypes() {
-
-	gt = make(map[string]int)
-
-	for _, days := range schedule.LeagueSchedule.GameDates {
-		for _, g := range days.Games {
-			
-			if g.WeekNumber == 0 {
-				gt[g.ID] = stats.PRESEASON
-			} else if g.WeekNumber > 0 {
-				gt[g.ID] = stats.REGULAR
-			} else if g.WeekNumber > 25 {
-				gt[g.ID] = stats.PLAYOFFS
-			}
-
-		}
-	}
-
-} // initScheduleGameTypes
 
 
 func parseBoxscores() []stats.NbaBoxscore {
@@ -767,6 +747,19 @@ func LoadBlobIndexes() {
 } // LoadBlobIndexes
 
 
+func initScheduleGameTypes() {
+
+	gt = make(map[string]int)
+
+	for _, days := range schedule.LeagueSchedule.GameDates {
+		for _, g := range days.Games {
+			gt[g.ID] = gameType(g)
+		}
+	}
+
+} // initScheduleGameTypes
+
+
 func generateData() {
 
 	leaders = make(map[int]*stats.Leaders)
@@ -783,7 +776,8 @@ func generateData() {
 
 	generatePlayers()
 
-	generateLeaders()
+	generateLeaders(GAME_TYPE_REGULAR)
+	generateLeaders(GAME_TYPE_PLAYOFF)
 
 	generateStandings()
 

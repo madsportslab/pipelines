@@ -9,7 +9,10 @@ import (
 
 type Download struct {
 	GameID					string				`json:"gameId"`
+	Resource        int           `json:"resource"`
 	Bucket					string				`json:"bucket"`
+	Created         string        `json:"created"`
+	Completed      	string        `json:"completed"`
 }
 
 
@@ -20,10 +23,17 @@ type Etl struct {
 }
 
 
+type State struct {
+	ID              string        `json:"id"`
+	Created         string        `json:"created"`
+	Completed      	string        `json:"completed"`
+}
+
+
 var syncTicker *time.Ticker
 var downloads chan Download
 var analytics chan Etl
-var jobState map[string] bool  // raw|analytics:gameId|seasonId:box|pbp
+var jobState map[string] *State  // raw|analytics:gameId|seasonId:box|pbp
 var jobMu sync.Mutex
 
 
@@ -38,7 +48,7 @@ func initJobListener() {
 
 	downloads = make(chan Download)
 	analytics = make(chan Etl)
-	jobState	= make(map[string] bool)
+	jobState	= make(map[string] *State)
 
 	go func() {
 
@@ -46,9 +56,20 @@ func initJobListener() {
 
 			select {
 			case job1 := <-downloads:
-				storeGame(job1.Bucket, job1.GameID)
-			case job2 := <-analytics:
-				log.Println(job2)
+
+				if job1.Resource == RESOURCE_BOXSCORE {
+					storeBoxscore(job1.Bucket, job1.GameID)
+				} else if job1.Resource == RESOURCE_PLAYBYPLAY {
+					storePlays(job1.Bucket, job1.GameID)
+				} else {
+					log.Println(job1.Resource)
+					log.Println("Error: unknown download resource type")
+				}
+
+			case <-analytics:
+				
+				generateData()
+
 			}
 		
 		}

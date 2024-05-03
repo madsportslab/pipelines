@@ -31,12 +31,9 @@ const (
 )
 
 const (
-	GAME_FINAL									= "Final"
-)
-
-const (
-	STR_TAB											= "\t"
 	STR_EMPTY										= ""
+	STR_PERIOD                  = "."
+	STR_TAB											= "\t"
 )
 
 const (
@@ -47,6 +44,45 @@ const (
 const (
 	JOB_BOXSCORE               	= "boxscore"
 	JOB_PLAYBYPLAY							= "playbyplay"
+)
+
+const (
+	GAME_TYPE_PRESEASON					= 0
+	GAME_TYPE_REGULAR           = 1
+	GAME_TYPE_INSEASON          = 2
+	GAME_TYPE_ALLSTAR           = 3
+	GAME_TYPE_PLAYIN            = 4
+	GAME_TYPE_PLAYOFF           = 5
+	GAME_TYPE_RISING_STARS      = 6
+	GAME_TYPE_UNKNOWN           = 7
+)
+
+const (
+	GAME_LABEL_ALLSTAR              = "All-Star Game"
+	GAME_LABEL_INSEASON           	= "In-Season Tournament"
+	GAME_LABEL_INTL									= "NBA"
+	GAME_LABEL_PLAYIN               = "Play-In"
+	GAME_LABEL_PRESEASON						= "Preseason"
+	GAME_LABEL_RISING_STARS					= "Rising Stars"
+	GAME_STATUS_FINAL               = "Final"
+	WEEK_NAME_ALLSTAR               = "All-Star"
+	WEEK_NAME_PLAYIN                = "Play-In"
+	
+)
+
+const (
+	PLAYERS_PREFIX      		= "players"
+	GAMES_PREFIX      			= "games"
+	LEADERS_PREFIX      		= "leaders"
+	STANDINGS_PREFIX    		= "standings"
+  PLAYOFF_PREFIX          = "playoffs"
+  REGULAR_PREFIX          = "regular"
+	PRESEASON_PREFIX        = "preseason"
+)
+
+const (
+	RESOURCE_BOXSCORE				= 0
+	RESOURCE_PLAYBYPLAY     = 1
 )
 
 var currentSeason	string

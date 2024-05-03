@@ -44,3 +44,37 @@ func TestParseListMixed(t *testing.T) {
 
 
 } // TestParseListMixed
+
+
+func TestStripGameIdValid(t *testing.T) {
+
+	id := stripGameId("0042000402.json")
+
+	if id != "0042000402" {
+		t.Error("game id invalid")
+	}
+
+} // TestStripGameIdValid
+
+
+func TestStripGameIdAlpha(t *testing.T) {
+
+	id := stripGameId("aabcd")
+
+	if id != "aabcd" {
+		t.Error("game id invalid, should return empty string")
+	}
+
+} // TestStripGameIdAlpha
+
+
+func TestStripGameIdEmpty(t *testing.T) {
+
+	id := stripGameId(STR_EMPTY)
+
+	if id != STR_EMPTY {
+		t.Log(id)
+		t.Error("game id invalid, should return empty string")
+	}
+
+} // TestStripGameIdEmpty

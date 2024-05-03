@@ -76,3 +76,22 @@ func getNowStamp() string {
 	return now.Format(NBA_DATE_FORMAT)
 
 } // getNowStamp
+
+
+func stripGameId(s string) string {
+
+	if len(s) == 0 {
+		return STR_EMPTY
+	}
+
+	tokens := strings.Split(s, STR_PERIOD)
+
+	if len(tokens) > 0 {
+
+		//TODO: regex to check if valid gameId
+		return tokens[0]
+	} else {
+		return STR_EMPTY
+	}
+
+} // stripGameId

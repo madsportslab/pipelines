@@ -6,7 +6,7 @@ require (
 	github.com/apache/arrow/go/v15 v15.0.2
 	github.com/gorilla/mux v1.8.1
 	github.com/madsportslab/nbalake v0.0.0-20240331150912-a09c6981e028
-	github.com/stephenhu/stats v0.5.7
+	github.com/stephenhu/stats v0.5.9
 )
 
 require (
